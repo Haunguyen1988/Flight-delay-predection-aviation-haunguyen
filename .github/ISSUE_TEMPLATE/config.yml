@@ -1,0 +1,14 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Codex Roadmap Reference
+    url: https://github.com/Haunguyen1988/Flight-delay-predection-aviation-haunguyen/blob/main/CODEX_IMPLEMENTATION_ROADMAP.md
+    about: Review the implementation roadmap before opening roadmap-related issues.
+  - name: Phase 1 Tasks
+    url: https://github.com/Haunguyen1988/Flight-delay-predection-aviation-haunguyen/blob/main/CODEX_TASKS_PHASE1.md
+    about: Use this when opening issues for Phase 1 work.
+  - name: Phase 2 and 3 Tasks
+    url: https://github.com/Haunguyen1988/Flight-delay-predection-aviation-haunguyen/blob/main/CODEX_TASKS_PHASE2_PHASE3.md
+    about: Use this when opening issues for Phase 2 or Phase 3 work.
+  - name: Phase 4 and 5 Tasks
+    url: https://github.com/Haunguyen1988/Flight-delay-predection-aviation-haunguyen/blob/main/CODEX_TASKS_PHASE4_PHASE5.md
+    about: Use this when opening issues for Phase 4 or Phase 5 work.
