@@ -1,0 +1,78 @@
+{
+  "xgboost": {
+    "accuracy": 0.7246,
+    "precision": 0.5714,
+    "recall": 0.3929,
+    "f1_score": 0.4657
+  },
+  "random_forest": {
+    "accuracy": 0.7293,
+    "precision": 0.5899,
+    "recall": 0.3726,
+    "f1_score": 0.4568
+  },
+  "ensemble": {
+    "accuracy": 0.7274,
+    "precision": 0.5812,
+    "recall": 0.3844,
+    "f1_score": 0.4628
+  },
+  "feature_importance": [
+    {
+      "feature": "weather_code",
+      "importance": 0.4764
+    },
+    {
+      "feature": "is_peak_hour",
+      "importance": 0.074
+    },
+    {
+      "feature": "season",
+      "importance": 0.0586
+    },
+    {
+      "feature": "hour",
+      "importance": 0.0444
+    },
+    {
+      "feature": "month",
+      "importance": 0.0402
+    },
+    {
+      "feature": "distance_cat",
+      "importance": 0.0398
+    },
+    {
+      "feature": "distance",
+      "importance": 0.0396
+    },
+    {
+      "feature": "airline_code",
+      "importance": 0.0387
+    },
+    {
+      "feature": "destination_airport",
+      "importance": 0.0387
+    },
+    {
+      "feature": "origin_airport",
+      "importance": 0.0387
+    },
+    {
+      "feature": "day_of_week",
+      "importance": 0.0382
+    },
+    {
+      "feature": "is_weekend",
+      "importance": 0.0369
+    },
+    {
+      "feature": "quarter",
+      "importance": 0.0358
+    }
+  ],
+  "dataset_size": 50000,
+  "train_size": 40000,
+  "test_size": 10000,
+  "trained_at": "2026-04-07T10:49:04.309171"
+}

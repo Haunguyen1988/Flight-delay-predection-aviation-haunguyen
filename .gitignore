@@ -1,0 +1,48 @@
+# Dependencies
+node_modules/
+frontend/node_modules/
+
+# Python
+backend/venv/
+backend/__pycache__/
+backend/app/__pycache__/
+**/__pycache__/
+*.pyc
+*.pyo
+
+# Environment
+.env
+backend/.env
+
+# Database
+*.db
+backend/data/*.db
+
+# ML Models (large files)
+backend/app/ml/models/*.pkl
+backend/app/ml/models/*.joblib
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Build
+frontend/dist/
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Uploads
+backend/data/*.csv
+!backend/data/.gitkeep
+
+# Brain (local session state)
+.brain/session.json
+.brain/session_log.txt
+
+# Frontend env
+frontend/.env

@@ -1,0 +1,135 @@
+{
+  "meta": {
+    "schema_version": "1.1.0",
+    "awf_version": "4.0.2",
+    "created_at": "2026-04-07T10:07:00Z",
+    "updated_at": "2026-04-07T11:07:33Z"
+  },
+  "project": {
+    "name": "Flight Delay Predictor",
+    "type": "fullstack-ml",
+    "status": "completed",
+    "description": "AI-powered flight delay prediction and analytics platform. Predicts delay probability using XGBoost + Random Forest ensemble model. Dashboard with interactive charts for route, weather, time analysis.",
+    "repository": "d:\\Flightdelaypredection\\flight-delay-predictor"
+  },
+  "tech_stack": {
+    "frontend": {
+      "framework": "React 19",
+      "language": "TypeScript",
+      "build_tool": "Vite 8",
+      "charts": "Recharts",
+      "http_client": "Axios",
+      "routing": "React Router DOM v7",
+      "icons": "Lucide React",
+      "styling": "Vanilla CSS (custom dark theme design system)",
+      "port": 5173
+    },
+    "backend": {
+      "framework": "FastAPI",
+      "language": "Python 3.10+",
+      "orm": "SQLAlchemy (async)",
+      "server": "Uvicorn",
+      "ml_libraries": ["scikit-learn", "xgboost", "joblib", "pandas"],
+      "port": 8000
+    },
+    "database": {
+      "type": "SQLite",
+      "driver": "aiosqlite",
+      "path": "backend/flights.db",
+      "summary": "App luu thong tin chuyen bay (flight_number, airline, route, thoi gian, thoi tiet, delay status). 50K sample flights generated."
+    }
+  },
+  "database_schema": {
+    "summary": "3 bang chinh: flights (du lieu chuyen bay), airlines (hang bay), airports (san bay)",
+    "tables": [
+      {
+        "name": "flights",
+        "columns": ["id", "flight_number", "airline_code", "origin_airport", "destination_airport", "scheduled_departure", "actual_departure", "scheduled_arrival", "actual_arrival", "delay_minutes", "delay_reason", "distance", "weather_condition", "day_of_week", "month", "is_delayed"],
+        "rows": 50000,
+        "description": "Du lieu chuyen bay voi thong tin delay, thoi tiet, khoang cach"
+      },
+      {
+        "name": "airlines",
+        "columns": ["id", "code", "name"],
+        "rows": 10,
+        "description": "Danh sach hang bay (AA, DL, UA, WN, B6, AS, NK, F9, VN, VJ)"
+      },
+      {
+        "name": "airports",
+        "columns": ["id", "code", "name", "city", "country"],
+        "rows": 13,
+        "description": "San bay (JFK, LAX, ORD, ATL, DFW, DEN, SFO, MIA, BOS, SEA, SGN, HAN, DAD)"
+      }
+    ],
+    "relationships_explained": "1 airline co nhieu flights, 1 airport la origin hoac destination cua nhieu flights"
+  },
+  "api_endpoints": [
+    { "method": "GET", "path": "/api/health", "explained": "Kiem tra server con song khong" },
+    { "method": "GET", "path": "/api/flights", "explained": "Lay danh sach chuyen bay (phan trang)" },
+    { "method": "GET", "path": "/api/flights/stats", "explained": "Thong ke tong quan: tong flights, ty le delay, delay trung binh" },
+    { "method": "GET", "path": "/api/flights/by-route", "explained": "Phan tich delay theo tuyen bay (top N)" },
+    { "method": "GET", "path": "/api/flights/by-weather", "explained": "Phan tich delay theo thoi tiet (Clear, Rain, Snow...)" },
+    { "method": "GET", "path": "/api/flights/by-time", "explained": "Phan tich delay theo thoi gian (gio, ngay, thang)" },
+    { "method": "GET", "path": "/api/flights/airlines", "explained": "Danh sach hang bay" },
+    { "method": "GET", "path": "/api/flights/airports", "explained": "Danh sach san bay" },
+    { "method": "POST", "path": "/api/data/upload", "explained": "Upload file CSV de import du lieu chuyen bay" },
+    { "method": "POST", "path": "/api/data/generate-sample", "explained": "Tao 50K chuyen bay mau va import vao DB" },
+    { "method": "POST", "path": "/api/predict", "explained": "Du doan xac suat delay cho 1 chuyen bay" },
+    { "method": "POST", "path": "/api/predict/batch", "explained": "Du doan delay cho nhieu chuyen bay cung luc (max 50)" },
+    { "method": "POST", "path": "/api/predict/train", "explained": "Train model ML tu du lieu trong DB" },
+    { "method": "GET", "path": "/api/predict/model/info", "explained": "Xem do chinh xac va thong tin model" }
+  ],
+  "ml_model": {
+    "type": "Ensemble (XGBoost + Random Forest)",
+    "accuracy": 0.727,
+    "precision": 0.581,
+    "recall": 0.384,
+    "f1_score": 0.463,
+    "training_data": "50K flights",
+    "top_features": [
+      { "name": "weather_code", "importance": 0.486 },
+      { "name": "is_peak_hour", "importance": 0.060 },
+      { "name": "season", "importance": 0.059 },
+      { "name": "hour", "importance": 0.044 },
+      { "name": "month", "importance": 0.040 }
+    ],
+    "feature_engineering": [
+      "hour, day_of_week, month, is_weekend, is_peak_hour, quarter, season",
+      "weather encoded: Clear=0, Cloudy=1, Rain=2, Fog=3, Snow=4",
+      "distance raw + categorical buckets",
+      "airline/origin/destination label encoded"
+    ],
+    "model_files": [
+      "backend/app/ml/models/xgboost_model.joblib",
+      "backend/app/ml/models/random_forest_model.joblib",
+      "backend/app/ml/models/encoders.joblib",
+      "backend/app/ml/models/metrics.json"
+    ]
+  },
+  "features": [
+    { "name": "Dashboard", "status": "completed", "description": "KPI cards + 4 interactive charts (route bar, weather pie, monthly area, hourly bar)" },
+    { "name": "ML Prediction", "status": "completed", "description": "Form input -> XGBoost+RF ensemble -> delay probability + confidence" },
+    { "name": "Data Management", "status": "completed", "description": "CSV upload, sample generator, model training, paginated data table" },
+    { "name": "API Analytics", "status": "completed", "description": "14 REST endpoints for flights, analytics, prediction" }
+  ],
+  "knowledge_items": {
+    "patterns": [
+      "React hooks pattern: useApi<T>(url, defaultValue) for all data fetching",
+      "FastAPI async pattern: SQLAlchemy async sessions with dependency injection",
+      "ML singleton pattern: FlightDelayPredictor class with lazy model loading",
+      "Batch DB insert: 5000 rows/batch for large CSV imports"
+    ],
+    "gotchas": [
+      "Windows PowerShell needs Set-ExecutionPolicy Bypass for npx/npm",
+      "Unicode print in Python on Windows console needs ASCII fallback",
+      "SQLite async needs aiosqlite driver",
+      "datetime-local HTML input needs format conversion for API (T -> space)"
+    ],
+    "conventions": [
+      "Dark theme design system with CSS variables (--bg-primary, --accent-blue, etc.)",
+      "API response format: { success: bool, data: T, message: string }",
+      "All pages import Header component with title/subtitle",
+      "CSS file: 950+ lines organized by component sections"
+    ]
+  }
+}
