@@ -74,16 +74,18 @@ async def upload_csv(file: UploadFile = File(...)):
 
 @router.post("/generate-sample", response_model=dict)
 async def generate_sample():
-    """Generate sample dataset for testing."""
+    """Generate a small sample dataset for quick demo seeding."""
     try:
-        from app.services.data_generator import generate_sample_data
-        output_path = generate_sample_data(50000)
+        from app.services.data_generator import generate_quick_sample_data
+        output_path = generate_quick_sample_data()
 
         # Read and import the generated file
         with open(output_path, "rb") as f:
             content = f.read()
 
         result = await import_csv_to_db(content)
+        if not result.get("success"):
+            raise HTTPException(status_code=500, detail=result.get("error", "Unknown error"))
 
         return {
             "success": True,
@@ -94,6 +96,8 @@ async def generate_sample():
             },
             "message": f"Generated and imported {result['rows_imported']} sample flights",
         }
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Sample generation failed: {e}")
         raise HTTPException(status_code=500, detail=str(e))
