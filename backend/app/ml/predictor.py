@@ -20,6 +20,8 @@ from sklearn.metrics import (
 from sklearn.preprocessing import LabelEncoder
 from xgboost import XGBClassifier
 
+from app.services.data_generator import TRAINING_SAMPLE_DATASET_PATH
+
 logger = logging.getLogger(__name__)
 
 MODEL_DIR = os.path.join(os.path.dirname(__file__), "models")
@@ -97,9 +99,7 @@ def train_models(csv_path: str = None, df: pd.DataFrame = None) -> Dict:
     # Load data
     if df is None:
         if csv_path is None:
-            csv_path = os.path.join(
-                os.path.dirname(__file__), "..", "data", "sample_flights.csv"
-            )
+            csv_path = TRAINING_SAMPLE_DATASET_PATH
         if not os.path.exists(csv_path):
             return {"success": False, "error": f"Dataset not found: {csv_path}"}
         df = pd.read_csv(csv_path)

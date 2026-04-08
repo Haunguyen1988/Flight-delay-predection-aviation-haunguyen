@@ -3,8 +3,8 @@ Sample dataset generator for development and testing.
 Generates realistic flight delay data.
 """
 import csv
-import random
 import os
+import random
 from datetime import datetime, timedelta
 
 
@@ -71,12 +71,19 @@ HOUR_DELAY_FACTOR = {
     20: 1.0, 21: 0.95, 22: 0.85, 23: 0.8,
 }
 
+SERVICE_DIR = os.path.dirname(__file__)
+APP_DIR = os.path.abspath(os.path.join(SERVICE_DIR, ".."))
+BACKEND_DIR = os.path.abspath(os.path.join(APP_DIR, ".."))
 
-def generate_sample_data(num_flights: int = 50000, output_path: str = None) -> str:
+TRAINING_SAMPLE_DATASET_PATH = os.path.join(APP_DIR, "data", "sample_flights.csv")
+QUICK_SAMPLE_DATASET_PATH = os.path.join(BACKEND_DIR, "data", "quick_sample_flights.csv")
+
+DEFAULT_TRAINING_SAMPLE_SIZE = 50000
+DEFAULT_QUICK_SAMPLE_SIZE = 10
+
+
+def _generate_sample_data(num_flights: int, output_path: str) -> str:
     """Generate a sample flight delay dataset."""
-    if output_path is None:
-        output_path = os.path.join(os.path.dirname(__file__), "..", "data", "sample_flights.csv")
-
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
     # Date range: 12 months
@@ -174,5 +181,27 @@ def generate_sample_data(num_flights: int = 50000, output_path: str = None) -> s
     return output_path
 
 
+def generate_quick_sample_data(
+    num_flights: int = DEFAULT_QUICK_SAMPLE_SIZE,
+    output_path: str | None = None,
+) -> str:
+    """Generate a small demo dataset for quick seeding into the app."""
+    return _generate_sample_data(
+        num_flights=num_flights,
+        output_path=output_path or QUICK_SAMPLE_DATASET_PATH,
+    )
+
+
+def generate_training_sample_data(
+    num_flights: int = DEFAULT_TRAINING_SAMPLE_SIZE,
+    output_path: str | None = None,
+) -> str:
+    """Generate the larger dataset used for model training."""
+    return _generate_sample_data(
+        num_flights=num_flights,
+        output_path=output_path or TRAINING_SAMPLE_DATASET_PATH,
+    )
+
+
 if __name__ == "__main__":
-    generate_sample_data(50000)
+    generate_training_sample_data()

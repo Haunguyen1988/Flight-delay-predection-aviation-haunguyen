@@ -1,6 +1,32 @@
+import axios from 'axios';
 import { useState, useEffect, useCallback } from 'react';
 import api from '../services/api';
-import type { FlightStats, RouteDelay, WeatherDelay, TimeDelay } from '../types/flight';
+import type {
+  ApiResponse,
+  FlightListResponse,
+  FlightStats,
+  ModelInfo,
+  PredictionHistoryResponse,
+  PredictionRequest,
+  PredictionResult,
+  RouteDelay,
+  TimeDelay,
+  UploadActionResult,
+  WeatherDelay,
+} from '../types/flight';
+
+function getErrorMessage(error: unknown, fallback: string) {
+  if (axios.isAxiosError(error)) {
+    const data = error.response?.data as { detail?: string; message?: string } | undefined;
+    return data?.detail ?? data?.message ?? error.message ?? fallback;
+  }
+
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  return fallback;
+}
 
 // ── Generic fetch hook ─────────────────────────────────────
 function useApi<T>(url: string, defaultValue: T) {
@@ -12,14 +38,14 @@ function useApi<T>(url: string, defaultValue: T) {
     setLoading(true);
     setError(null);
     try {
-      const res = await api.get(url);
+      const res = await api.get<ApiResponse<T>>(url);
       if (res.data.success) {
         setData(res.data.data);
       } else {
         setError(res.data.message || 'Unknown error');
       }
-    } catch (err: any) {
-      setError(err.response?.data?.detail || err.message || 'Connection failed');
+    } catch (error: unknown) {
+      setError(getErrorMessage(error, 'Connection failed'));
     } finally {
       setLoading(false);
     }
@@ -64,7 +90,7 @@ export function useFlightList(page = 1, limit = 20, filters: Record<string, stri
   Object.entries(filters).forEach(([k, v]) => {
     if (v) params.set(k, v);
   });
-  return useApi<any>(`/api/flights?${params.toString()}`, {
+  return useApi<FlightListResponse>(`/api/flights?${params.toString()}`, {
     flights: [],
     total: 0,
     page: 1,
@@ -75,34 +101,42 @@ export function useFlightList(page = 1, limit = 20, filters: Record<string, stri
 
 // ── Model Info ─────────────────────────────────────────────
 export function useModelInfo() {
-  return useApi<any>('/api/predict/model/info', { status: 'unknown' });
+  return useApi<ModelInfo>('/api/predict/model/info', { status: 'unknown' });
+}
+export function usePredictionHistory(page = 1, limit = 5, filters: Record<string, string> = {}) {
+  const params = new URLSearchParams({ page: String(page), limit: String(limit) });
+  Object.entries(filters).forEach(([key, value]) => {
+    if (value) params.set(key, value);
+  });
+
+  return useApi<PredictionHistoryResponse>(`/api/predict/history?${params.toString()}`, {
+    items: [],
+    total: 0,
+    page,
+    limit,
+    total_pages: 0,
+  });
 }
 
 // ── Prediction (manual call) ───────────────────────────────
 export function usePrediction() {
-  const [result, setResult] = useState<any>(null);
+  const [result, setResult] = useState<PredictionResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const predict = async (data: {
-    airline: string;
-    origin: string;
-    destination: string;
-    departure_datetime: string;
-    weather_condition?: string;
-  }) => {
+  const predict = async (data: PredictionRequest) => {
     setLoading(true);
     setError(null);
     setResult(null);
     try {
-      const res = await api.post('/api/predict', data);
+      const res = await api.post<ApiResponse<PredictionResult>>('/api/predict', data);
       if (res.data.success) {
         setResult(res.data.data);
       } else {
         setError(res.data.message || 'Prediction failed');
       }
-    } catch (err: any) {
-      setError(err.response?.data?.detail || err.message || 'Prediction failed');
+    } catch (error: unknown) {
+      setError(getErrorMessage(error, 'Prediction failed'));
     } finally {
       setLoading(false);
     }
@@ -114,7 +148,7 @@ export function usePrediction() {
 // ── Upload CSV ─────────────────────────────────────────────
 export function useUpload() {
   const [progress, setProgress] = useState(0);
-  const [result, setResult] = useState<any>(null);
+  const [result, setResult] = useState<UploadActionResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -128,7 +162,7 @@ export function useUpload() {
     formData.append('file', file);
 
     try {
-      const res = await api.post('/api/data/upload', formData, {
+      const res = await api.post<ApiResponse<UploadActionResult>>('/api/data/upload', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
         timeout: 300000, // 5 min for large files
         onUploadProgress: (e) => {
@@ -141,8 +175,8 @@ export function useUpload() {
       } else {
         setError(res.data.message || 'Upload failed');
       }
-    } catch (err: any) {
-      setError(err.response?.data?.detail || err.message || 'Upload failed');
+    } catch (error: unknown) {
+      setError(getErrorMessage(error, 'Upload failed'));
     } finally {
       setLoading(false);
     }
@@ -153,14 +187,14 @@ export function useUpload() {
     setError(null);
     setResult(null);
     try {
-      const res = await api.post('/api/data/generate-sample');
+      const res = await api.post<ApiResponse<UploadActionResult>>('/api/data/generate-sample');
       if (res.data.success) {
         setResult(res.data.data);
       } else {
         setError(res.data.message);
       }
-    } catch (err: any) {
-      setError(err.response?.data?.detail || err.message);
+    } catch (error: unknown) {
+      setError(getErrorMessage(error, 'Sample generation failed'));
     } finally {
       setLoading(false);
     }
@@ -170,14 +204,14 @@ export function useUpload() {
     setLoading(true);
     setError(null);
     try {
-      const res = await api.post('/api/predict/train');
+      const res = await api.post<ApiResponse<UploadActionResult>>('/api/predict/train');
       if (res.data.success) {
         setResult({ ...res.data.data, type: 'training' });
       } else {
         setError(res.data.message);
       }
-    } catch (err: any) {
-      setError(err.response?.data?.detail || err.message);
+    } catch (error: unknown) {
+      setError(getErrorMessage(error, 'Training failed'));
     } finally {
       setLoading(false);
     }

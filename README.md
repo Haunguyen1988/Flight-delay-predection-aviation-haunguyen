@@ -17,12 +17,14 @@ AI-powered flight delay prediction and analytics platform built with FastAPI + R
   - XGBoost + Random Forest ensemble model
   - 72.7% accuracy on 50K flight dataset
   - Inputs: Airline, Origin, Destination, Date/Time, Weather
-  - Output: Delay probability, estimated delay, confidence level
+  - Output: Delay probability, estimated delay, confidence level, risk band, severity band
+  - Action layer: recommendation list and lightweight explanation factors
+  - Prediction page includes recent prediction history from saved single-flight results
 
 - **📁 Data Management** - Import and manage datasets
   - CSV upload with drag & drop
-  - Sample data generator (50K realistic flights)
-  - One-click model training
+  - Quick sample generator (10 demo flights)
+  - One-click model training from the bundled 50K training dataset
   - Paginated flight data table
 
 ## Tech Stack
@@ -80,17 +82,17 @@ npm run dev
 ### Quick Data Setup
 
 1. Open http://localhost:5173/data
-2. Click **"Generate"** to create 50K sample flights
-3. Click **"Train"** to train the ML model
+2. Click **"Generate"** to seed 10 sample flights into the app
+3. Click **"Train"** to train the ML model from the bundled 50K training dataset
 4. Go to **Dashboard** to see analytics
-5. Go to **Prediction** to predict delays
+5. Go to **Prediction** to predict delays and review recent saved predictions
 
 Or via API:
 ```bash
-# Generate sample data + import to DB
+# Seed 10 sample flights + import to DB
 curl -X POST http://localhost:8000/api/data/generate-sample
 
-# Train ML models
+# Train ML models from the bundled training dataset
 curl -X POST http://localhost:8000/api/predict/train
 
 # Make a prediction
@@ -112,11 +114,81 @@ curl -X POST http://localhost:8000/api/predict \
 | GET | `/api/flights/airlines` | List airlines |
 | GET | `/api/flights/airports` | List airports |
 | POST | `/api/data/upload` | Upload CSV dataset |
-| POST | `/api/data/generate-sample` | Generate sample data |
+| POST | `/api/data/generate-sample` | Seed 10 sample flights into the app |
 | POST | `/api/predict` | Predict flight delay |
 | POST | `/api/predict/batch` | Batch predictions |
 | POST | `/api/predict/train` | Train ML models |
+| GET | `/api/predict/history` | Recent saved single-flight predictions |
 | GET | `/api/predict/model/info` | Model performance info |
+
+## Prediction Output
+
+Single prediction responses now include:
+
+- `delay_probability`
+- `estimated_delay_minutes`
+- `confidence`
+- `risk_band`
+- `severity_band`
+- `recommendations`
+- `explanations`
+
+Example prediction response shape:
+
+```json
+{
+  "success": true,
+  "data": {
+    "delay_probability": 0.64,
+    "estimated_delay_minutes": 73,
+    "confidence": "High",
+    "risk_band": "High",
+    "severity_band": "Major",
+    "recommendations": [
+      "Monitor weather-related disruption risk closely",
+      "Review downstream rotation impact if delay occurs"
+    ],
+    "explanations": [
+      {
+        "factor": "Weather",
+        "impact": "high",
+        "message": "Snow or fog conditions can quickly reduce airport and en-route reliability"
+      }
+    ]
+  },
+  "message": "Prediction complete"
+}
+```
+
+Prediction history response shape:
+
+```json
+{
+  "success": true,
+  "data": {
+    "items": [
+      {
+        "id": 1,
+        "created_at": "2026-04-07T10:00:00",
+        "airline": "AA",
+        "origin": "JFK",
+        "destination": "LAX",
+        "departure_datetime": "2025-12-20T17:30:00",
+        "delay_probability": 0.64,
+        "estimated_delay_minutes": 73,
+        "risk_band": "High",
+        "severity_band": "Major",
+        "confidence": "High"
+      }
+    ],
+    "page": 1,
+    "limit": 10,
+    "total": 1,
+    "total_pages": 1
+  },
+  "message": "OK"
+}
+```
 
 ## Project Structure
 

@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import { Upload, FileSpreadsheet, Database, Brain, RefreshCw } from 'lucide-react';
 import Header from '../components/layout/Header';
 import { useUpload, useFlightList } from '../hooks/useApi';
+import type { FlightListItem } from '../types/flight';
 
 export default function DataManagement() {
   const [dragging, setDragging] = useState(false);
@@ -60,7 +61,7 @@ export default function DataManagement() {
             <Database size={28} style={{ color: 'var(--accent-purple)', marginBottom: 8 }} />
             <h3 style={{ fontSize: 14, fontWeight: 600, marginBottom: 4 }}>Generate Sample</h3>
             <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 12 }}>
-              Create 50K sample flights
+              Seed 10 demo flights
             </p>
             <button className="btn btn-secondary btn-sm" onClick={handleGenerateSample}
               disabled={loading}>
@@ -117,8 +118,10 @@ export default function DataManagement() {
               background: 'var(--success-bg)', color: 'var(--success)', fontSize: 13,
             }}>
               {result.type === 'training'
-                ? `Model trained! Accuracy: ${(result.ensemble?.accuracy * 100).toFixed(1)}% (${result.duration_seconds}s)`
-                : `Imported ${result.rows_imported?.toLocaleString()} flights in ${result.duration_seconds}s`}
+                ? `Model trained! Accuracy: ${(((result.ensemble?.accuracy ?? 0) * 100)).toFixed(1)}% (${result.duration_seconds ?? 0}s)`
+                : result.file_path
+                  ? `Generated and imported ${result.rows_imported?.toLocaleString() ?? 0} sample flights in ${result.duration_seconds ?? 0}s`
+                  : `Imported ${result.rows_imported?.toLocaleString() ?? 0} flights in ${result.duration_seconds ?? 0}s`}
             </div>
           )}
 
@@ -159,7 +162,7 @@ export default function DataManagement() {
                     </tr>
                   </thead>
                   <tbody>
-                    {flightData.flights.map((f: any) => (
+                    {flightData.flights.map((f: FlightListItem) => (
                       <tr key={f.id}>
                         <td style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{f.flight_number}</td>
                         <td>{f.airline_code}</td>
